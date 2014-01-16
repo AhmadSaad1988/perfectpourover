@@ -1,0 +1,23 @@
+<%include file="forms.html" />
+<%namespace name="forms" file="forms.html"/>
+
+<%include file="header.html" />
+
+<script>
+  subpour_names = {${subpour_names}};
+</script>
+
+<table>
+  <tr>
+    <td>
+      <h1>Pours</h1><br/>
+      <a href="/pours/create">New</a>
+    </td>
+  </tr>
+  <tr>
+    <td>1,2,3,</td>
+    <td>
+      ${forms.pour_form()}
+    </td>
+  </tr>
+</table>

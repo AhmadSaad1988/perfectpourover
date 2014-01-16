@@ -39,11 +39,10 @@ class Pour(object):
     pass
 
   def GET(self, n=None):
-    if n==None:
-      return self.tmpl.render() 
-    else: 
-      return n
-      #pour = database.pours[n]
+    #subpour_names = ", ".join(["%d: '%s'" % (num, database.subpours[num].name)
+                               #for num in database.subpours.keys()])
+    args = dict(subpour_names=subpour_names, n=n)
+    return self.tmpl.render(**args)
 
   def POST(self, **args):
     n = database.next_pour()
