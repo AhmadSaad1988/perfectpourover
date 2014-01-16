@@ -23,36 +23,43 @@ class Server(object):
 
 class Pour(object):
   
-  def GET(self, id=None):
-    pour = database.pours[id]
-    pass
+  def GET(self, n=None):
+    if n==None:
+      pass
+    else: 
+      pour = database.pours[n]
 
   def POST(self, **args):
     n = database.next_pour()
     database.pours[n] = PourData(**args)
     save_data()
-    pass
 
   def PUT(self, n, **args):
-    
-    pass
+    database.pours[n].update(**args)
+    save_data()
 
-  def DELETE(self, id):
-    pass
+  def DELETE(self, n):
+    del database.pours[n] 
 
 class Subpour(object):
   
-  def GET(self, id=None):
-    pass
+  def GET(self, n=None):
+    if n==None:
+      pass
+    else:
+      subpour = database.subpours[n]
 
-  def POST(self, name, duration, radius, r0, o0, nrots, post_center):
-    pass
+  def POST(self, **args):
+    n = database.next_subpour()
+    database.subpours[n] = SubpourData(**args)
+    save_data();
 
-  def PUT(self, name, duration, radius, r0, o0, nrots, post_center):
-    pass
+  def PUT(self, n, **args):
+    database.subpours[n].update(**args)
+    save_data()
 
-  def DELETE(self, id):
-    pass
+  def DELETE(self, n):
+    del database.subpours[n]
 
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
