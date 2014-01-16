@@ -2,39 +2,39 @@
     % if n!=None:
       Subpour ID: ${n}
     % endif
-  <form name="subpour_form" action="/subpours/${n if n!=None else ''}" method="${form_method}">
+  <form name="subpour_form" ${'class="updateForm" id="/subpours/' + n+ '"' if n else ''} action="/subpours/${n if n!=None else ''}" method="${form_method}">
     <table>
       <tr>
         <td>Name</td>
-        <td><input type="text" name="name"/></td>
+        <td><input type="text" name="name" value="${subpours[n].name if n else ''}"/></td>
       </tr>
       <tr>
         <td>Duration</td>
-        <td><input type="text" name="duration"/></td>
+        <td><input type="text" name="duration" value="${subpours[n].duration if n else ''}"/></td>
       </tr>
       <tr>
         <td>Radius</td>
-        <td><input type="text" name="radius"/></td>
+        <td><input type="text" name="radius" value="${subpours[n].radius if n else ''}"/></td>
       </tr>
       <tr>
         <td>Initial Radius</td>
-        <td><input type="text" name="r0"/></td>
+        <td><input type="text" name="r0" value="${subpours[n].r0 if n else ''}"/></td>
       </tr>
       <tr>
         <td>Initial Theta</td>
-        <td><input type="text" name="o0"/></td>
+        <td><input type="text" name="o0" value="${subpours[n].o0 if n else ''}"/></td>
       </tr>
       <tr>
         <td>Rotations</td>
-        <td><input type="text" name="nrots"/></td>
+        <td><input type="text" name="nrots" value="${subpours[n].nrots if n else ''}"/></td>
       </tr>
       <tr>
         <td>Water on</td>
-        <td><input type="checkbox" name="water"/></td>
+        <td><input type="checkbox" name="water" ${'checked' if n and subpours[n].water else 'unchecked'}/></td>
       </tr>
       <tr>
         <td>Back to center</td>
-        <td><input type="checkbox" name="post_center"/></td>
+        <td><input type="checkbox" name="post_center" ${'checked' if n and subpours[n].post_center else 'unchecked'}/></td>
       </tr>
       <tr>
         <td></td>
