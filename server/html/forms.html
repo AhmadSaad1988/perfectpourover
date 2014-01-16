@@ -1,0 +1,53 @@
+<%def name="subpour_form(method)">
+  <form name="subpour_form" action="" method="${method}">
+    <table>
+      <tr>
+        <td>Name</td>
+        <td><input type="text" name="name"/></td>
+      </tr>
+      <tr>
+        <td>Duration</td>
+        <td><input type="text" name="duration"/></td>
+      </tr>
+      <tr>
+        <td>Radius</td>
+        <td><input type="text" name="radius"/></td>
+      </tr>
+      <tr>
+        <td>Initial Radius</td>
+        <td><input type="text" name="r0"/></td>
+      </tr>
+      <tr>
+        <td>Initial Theta</td>
+        <td><input type="text" name="o0"/></td>
+      </tr>
+      <tr>
+        <td>Rotations</td>
+        <td><input type="text" name="nrots"/></td>
+      </tr>
+      <tr>
+        <td>Water on</td>
+        <td><input type="checkbox" name="water"/></td>
+      </tr>
+      <tr>
+        <td>Back to center</td>
+        <td><input type="checkbox" name="post_center"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" /></td>
+      </tr>
+    </table>
+  </form>
+</%def>
+
+<%def name="pour_form()">
+  <form action="" method="">
+    <table>
+      <tr>
+        <td>Name</td>
+        <td><input type="text" name="name">
+      </tr>
+    </table>
+  </form>
+</%def>
