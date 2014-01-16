@@ -32,13 +32,14 @@ from PIL import Image
 import numpy as np
 import base64
 class SubpourData(Base):
-  def __init__(self, name, duration, radius, r0, o0, nrots, post_center):
+  def __init__(self, name, duration, radius, r0, o0, nrots, water, post_center):
     self.name = name
     self.duration = duration
     self.radius = radius
     self.r0 = r0
     self.o0 = o0
     self.nrots = nrots
+    self.water = water
     self.post_center = post_center
     self.num_rotations = num_rotations
     self.time = time
@@ -61,7 +62,7 @@ class SubpourData(Base):
     buf.seek(0)
     base64.encode(buf, outbuf)
     return outbuf.getvalue()
-  def update(self, name, duration, radius, r0, o0, nrots):
+  def update(self, name, duration, radius, r0, o0, nrots, water, post_center):
     pass
 
 

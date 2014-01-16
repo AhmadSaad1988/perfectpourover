@@ -1,5 +1,5 @@
-<%def name="subpour_form()">
-  <form name="subpour_form" action="" method="">
+<%def name="subpour_form(method)">
+  <form name="subpour_form" action="" method="${method}">
     <table>
       <tr>
         <td>Name</td>
@@ -24,6 +24,10 @@
       <tr>
         <td>Rotations</td>
         <td><input type="text" name="nrots"/></td>
+      </tr>
+      <tr>
+        <td>Water on</td>
+        <td><input type="checkbox" name="water"/></td>
       </tr>
       <tr>
         <td>Back to center</td>
