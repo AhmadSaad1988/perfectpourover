@@ -73,6 +73,7 @@ class Subpour(object):
     tmpl = lookup.get_template('subpours.html')
     args = dict()
     args['n'] = n
+    args['subpours'] = database.subpours
     if n==None:
       args['form_method'] = 'POST' 
     else: 
@@ -97,6 +98,7 @@ class Subpour(object):
 
   def DELETE(self, n):
     del database.subpours[n]
+    return "meh"
 
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
