@@ -19,10 +19,12 @@ class Database():
 class PourData():
 
   def __init__(self, name, subpours=None):
-    pass
+    self.name = name
+    self.subpours = subpours
 
-  def update(self, subpours):
-    pass
+  def update(self, name, subpours=None):
+    self.name = name
+    self.subpours = subpours
 
 from math import pi
 from StringIO import StringIO

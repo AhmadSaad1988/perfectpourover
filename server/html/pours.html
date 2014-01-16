@@ -4,18 +4,49 @@
 <%include file="header.html" />
 
 <script>
-  subpour_names = {${subpour_names}};
+  subpour_names = {
+    % for (i, name) in subpour_names.items():
+      ${i}: "${name}",
+    % endfor
+  }
+
+  $(function() {
+    $(".delete_button").click(function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: '/pours/' + e.target.id.slice(7),
+        type: 'DELETE',
+        success: function() {
+          location.href = '/pours';
+        }
+      });
+    });
+  });
 </script>
 
 <table>
   <tr>
     <td>
       <h1>Pours</h1><br/>
-      <a href="/pours/create">New</a>
     </td>
   </tr>
   <tr>
-    <td>1,2,3,</td>
+    <td>
+      % for (i, pour) in pours.items():
+        <p>
+          %if i != n:
+            <a href="/pours/${i}">
+          %endif
+          ${pour.name}
+          %if i != n:
+            </a>
+          %endif
+          &nbsp;
+          <a href="#" id="delete_${i}" class="delete_button">Delete</a>
+          <a href="#" id="run_${i}" class="run_button">Run</a>
+          </p>
+      % endfor
+    </td>
     <td>
       ${forms.pour_form()}
     </td>

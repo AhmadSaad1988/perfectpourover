@@ -2,7 +2,8 @@
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 
-<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="/jquery-ui/js/jquery-1.9.1.js"></script>
+<script src="/jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
 
 <div class="navbar">
     <div class="logo">
@@ -14,8 +15,17 @@
     <div class="link active">
         SUBPOURS
     </div>
+    <div class="link status">
+        Connecting to server...
+    </div>
 </div>
 
+<script>
+$(function() {
+  timer = setInterval(function(){
+    $.get("/status", function(data) { $(".status").html(data); });
+  }, 1000);
+});
+</script>
 
-
-
+<br clear="all">

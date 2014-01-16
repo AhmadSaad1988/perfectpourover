@@ -5,12 +5,23 @@ import serial
 from PIL import Image
 import numpy as np
 import base64
+import threading
 
 try:
-	ser = serial.Serial('/dev/ttyACM0', 9600)
+	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0.1)
 except OSError:
 	ser = None
 
+temperature = None
+def status_thread():
+  while True:
+    resp = ""
+    while True:
+      byte = ser.read()
+      if byte == "\n":
+        break
+      else:
+        resp.append(byte)
 
 def serialize(subpours):
 	buf = StringIO()

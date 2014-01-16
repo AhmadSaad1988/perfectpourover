@@ -54,3 +54,8 @@ body{
     border-bottom-width:10px;
     border-bottom-color:#FFFFFF;
 }
+
+.navbar .link.status {
+  float: right;
+  font-size: 16pt;
+}

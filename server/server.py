@@ -1,6 +1,7 @@
 import cherrypy
 import pickle
 import database as db
+import pour_serial
 from mako.template import Template
 from mako.lookup import TemplateLookup
 import os, os.path
@@ -33,30 +34,42 @@ class Server(object):
 class Pour(object):
 
   exposed = True
-  tmpl = lookup.get_template('pours.html')
 
   def table(self):
     pass
 
+  def get_subpour_names(self):
+    return dict((num, database.subpours[num].name)
+                      for num in database.subpours.keys())
+
   def GET(self, n=None):
-    #subpour_names = ", ".join(["%d: '%s'" % (num, database.subpours[num].name)
-                               #for num in database.subpours.keys()])
-    args = dict(subpour_names=subpour_names, n=n)
-    return self.tmpl.render(**args)
+    if n is not None:
+      n = int(n)
+    tmpl = lookup.get_template('pours.html')
+    args = dict(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
+    return tmpl.render(**args)
 
   def POST(self, **args):
+    tmpl = lookup.get_template('pours.html')
     n = database.next_pour()
-    return str(args)
-    '''
-    database.pours[n] = db.PourData(**args)
+    subpours = map(int, args['subpours'].split(", "))
+    if not args['name'] or len(subpours) == 0:
+      return self.GET()
+    database.pours[n] = db.PourData(name=args['name'], subpours=subpours)
     save_data()
-    '''
+    return tmpl.render(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
+
   def PUT(self, n, **args):
-    database.pours[n].update(**args)
+    n = int(n)
+    subpours = map(int, args['subpours'].split(", "))
+    if not args['name'] or len(subpours) == 0:
+      return self.GET()
+    print n, type(n)
+    database.pours[n].update(subpours=subpours, name=args['name'])
     save_data()
 
   def DELETE(self, n):
-    del database.pours[n] 
+    del database.pours[int(n)] 
 
 class Subpour(object):
 
@@ -97,10 +110,19 @@ class Subpour(object):
   def DELETE(self, n):
     del database.subpours[n]
 
+class status:
+  exposed = True
+  def GET(self):
+    if pour_serial.temperature is None:
+      return "no response from server"
+    else:
+      return "water temp %d&deg;F" % pour_serial.temperature
+
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
             }) 
-conf = {'/css': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'css')}}
+conf = {'/css': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'css')},
+        '/jquery-ui': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'jquery-ui')}}
 
 cherrypy.tree.mount(Pour(), '/pours',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
@@ -108,5 +130,7 @@ cherrypy.tree.mount(Pour().table, '/pours/table')
 cherrypy.tree.mount(Subpour(), '/subpours',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 cherrypy.tree.mount(Subpour().table, '/subpours/table')
+cherrypy.tree.mount(status(), '/status',
+{'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 server = Server()
 cherrypy.quickstart(server, config=conf)
