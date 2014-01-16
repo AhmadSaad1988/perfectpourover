@@ -59,7 +59,7 @@ class SubpourData():
     outbuf = StringIO()
     buf.seek(0)
     base64.encode(buf, outbuf)
-    return outbuf.getvalue()
+    return 'data:image/png;base64,' + outbuf.getvalue()
   def update(self, name, duration, radius, r0, o0, nrots, water, post_center):
     self.name = name
     self.duration = int(duration) if not duration == '' else 1

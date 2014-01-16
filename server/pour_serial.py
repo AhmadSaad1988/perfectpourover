@@ -50,13 +50,18 @@ if ser is not None:
 def serialize(subpours):
 	buf = StringIO()
 	for pour in subpours:
-		buf.write('theta_intital=0.0 theta_rate=' + str(pour.angle_rate))
-		buf.write(' radius_initial=0.0 radius_rate=' + str(pour.radius_rate))
-		buf.write(' time=' + str(pour.time) + ' pump=1.0\n')
-		buf.write('theta_initial=0.0 theta_rate=0.0')
-		buf.write(' radius_initial=1.0 radius_rate=' + str(-1.0 / pour.time_after))
-		buf.write(' time=' + str(pour.time_after) + ' pump=0.0\n')
-	return 'data:image/png;base64,' + buf.getvalue()
+    buf.write('Linear\n')
+    # theta initial and rate
+		buf.write('0.0\n' + str(pour.angle_rate) + '\n')
+    # radius initial and rate
+		buf.write('0.0\n' + str(pour.radius_rate) + '\n')
+    # time and pump on or off
+		buf.write(str(float(pour.time)) + '\n1\n')
+    buf.write('Linear\n')
+		buf.write('0.0\n0.0\n')
+		buf.write('1.0\n' + str(-1.0 / pour.time_after) + '\n')
+		buf.write(str(pour.time_after) + '\n0\n')
+  return buf.getvalue()
 
 def send_pour(subpours):
 	if ser is None:
