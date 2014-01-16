@@ -27,12 +27,14 @@ class Pour(object):
     pour = database.pours[id]
     pass
 
-  def POST(self, name):
-    database.
+  def POST(self, **args):
+    n = database.next_pour()
+    database.pours[n] = PourData(**args)
     save_data()
     pass
 
-  def PUT(self, name, seq):
+  def PUT(self, n, **args):
+    
     pass
 
   def DELETE(self, id):
