@@ -1,24 +1,22 @@
 import pickle
 
-class Database(Base):
-  
-  subpours = dict()
-  pours = dict()
+class Database():
 
-  def __init__(self, fname):
-    self.next_subpour = 1
-    self.next_pour = 1
-    pass
+  def __init__(self):
+    self.subpours = dict()
+    self.pours = dict()
+    self.curr_subpour = 1
+    self.curr_pour = 1
 
   def next_pour(self):
-    self.next_pour = self.next_pour + 1
-    return self.next_pour - 1
+    self.curr_pour = self.curr_pour + 1
+    return self.curr_pour - 1
 
   def next_subpour(self):
-    self.next_pour = self.next_subpour + 1
-    return self.next_subpour - 1
+    self.curr_subpour = self.curr_subpour + 1
+    return self.curr_subpour - 1
 
-class PourData(Base):
+class PourData():
 
   def __init__(self, name, subpours=None):
     pass
@@ -31,23 +29,21 @@ from StringIO import StringIO
 from PIL import Image
 import numpy as np
 import base64
-class SubpourData(Base):
+class SubpourData():
   def __init__(self, name, duration, radius, r0, o0, nrots, water, post_center):
     self.name = name
-    self.duration = duration
-    self.radius = radius
-    self.r0 = r0
-    self.o0 = o0
-    self.nrots = nrots
+    self.duration = int(duration) if not duration == '' else 1
+    self.radius = float(radius) if not radius == '' else 1
+    self.r0 = float(r0) if not r0 == '' else 1
+    self.o0 = float(o0) if not o0 == '' else 1
+    self.nrots = int(nrots) if not nrots == '' else 1
     self.water = water
     self.post_center = post_center
-    self.num_rotations = num_rotations
-    self.time = time
-    self.time_after = time_after
-    self.angle_rate = (2.0 * pi * nrots) / duration
-    self.radius_rate = 1.0 / duration
+    #self.time_after = time_after
+    self.angle_rate = (2.0 * pi * self.nrots) / self.duration
+    self.radius_rate = 1.0 / self.duration
   def draw(self):
-    times = np.linspace(0, self.time, 1024 * 8)
+    times = np.linspace(0, self.duration, 1024 * 8)
     angles = self.o0 + times * self.angle_rate
     radii = self.r0 + times * self.radius_rate
     image = np.empty((200, 200), np.uint8)

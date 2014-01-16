@@ -1,5 +1,8 @@
-<%def name="subpour_form(method)">
-  <form name="subpour_form" action="" method="${method}">
+<%def name="subpour_form()">
+    % if n!=None:
+      Subpour ID: ${n}
+    % endif
+  <form name="subpour_form" action="/subpours/${n if n!=None else ''}" method="${form_method}">
     <table>
       <tr>
         <td>Name</td>

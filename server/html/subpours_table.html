@@ -1,0 +1,26 @@
+<table cellpadding=5px border=1px>
+<tr>
+  <td>Id</td>
+  <td>Name</td>
+  <td>Duration</td>
+  <td>Radius</td>
+  <td>Init Radius</td>
+  <td>Init Theta</td>
+  <td>Num Rots</td>
+  <td>Water</td>
+  <td>Post Center</td>
+</tr>
+%for n,sp in subpours.items():
+  <tr>
+    <td>${n}</td>
+    <td>${sp.name}</td>
+    <td>${sp.duration}</td>
+    <td>${sp.radius}</td>
+    <td>${sp.r0}</td>
+    <td>${sp.o0}</td>
+    <td>${sp.nrots}</td>
+    <td>${sp.water}</td>
+    <td>${sp.post_center}</td>
+  </tr>
+%endfor
+</table>

@@ -1,4 +1,19 @@
+<%include file="forms.html" />
 <%namespace name="forms" file="forms.html"/>
+
 <%include file="header.html" />
 
-<a href="/pours/create">New</a>
+<table>
+  <tr>
+    <td>
+      <h1>Subpours</h1><br/>
+      <a href="/pours/create">New</a>
+    </td>
+  </tr>
+  <tr>
+    <td>1,2,3,</td>
+    <td>
+      ${forms.subpour_form()}
+    </td>
+  </tr>
+</table>
