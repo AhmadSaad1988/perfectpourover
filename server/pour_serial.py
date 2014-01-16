@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 import base64
 import threading
+from time import sleep
 
 try:
 	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0.1)
@@ -13,15 +14,38 @@ except OSError:
 	ser = None
 
 temperature = None
+pour_time = None
 def status_thread():
   while True:
     resp = ""
+    temp = None
+    time = None
     while True:
       byte = ser.read()
       if byte == "\n":
         break
       else:
-        resp.append(byte)
+        resp += byte
+    if resp == "Temp":
+      temp = True
+    elif resp == "Time":
+      time = True
+    elif resp == "End Pour":
+      pour_time = None
+      temp = None
+      time = None
+    elif temp is True:
+      temperature = float(resp)
+      temp = None
+      time = None
+    elif time is True:
+      pour_time = float(resp)
+      temp = None
+      time = None
+    sleep(1)
+if ser is not None:
+  status_thread_obj = threading.Thread(target=status_thread)
+  status_thread_obj.start()
 
 def serialize(subpours):
 	buf = StringIO()

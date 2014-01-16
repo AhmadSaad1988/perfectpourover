@@ -120,10 +120,15 @@ class Subpour(object):
 class status:
   exposed = True
   def GET(self):
-    if pour_serial.temperature is None:
-      return "no response from server"
+    if pour_serial.ser is None:
+      return "no arduino connected"
+    elif pour_serial.temperature is None:
+      return "no response from arduino"
     else:
-      return "water temp %d&deg;F" % pour_serial.temperature
+      resp = "water temp %.02f&deg;F" % pour_serial.temperature
+      if pour_serial.pour_time is not None:
+        resp += ", pouring for %.02f seconds" % pour_serial.pour_time
+      return resp
 
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
