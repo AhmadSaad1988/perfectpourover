@@ -7,11 +7,22 @@
   <tr>
     <td>
       <h1>Subpours</h1><br/>
-      <a href="/pours/create">New</a>
+      <a href="/subpours">New</a>
     </td>
   </tr>
   <tr>
-    <td>1,2,3,</td>
+    <td>
+      <table>
+        %for (n, sp) in subpours.items():
+          <tr>
+            <td>${n}</td>
+            <td>${sp.name}</td>
+            <td><a href="/subpours/${n}" >View/Edit</a><td>
+            <td><a href="#" id="/subpours/${n}" class="deleteLink">Delete</a></td>
+          </tr>
+        % endfor
+      </table>
+    </td>
     <td>
       ${forms.subpour_form()}
     </td>

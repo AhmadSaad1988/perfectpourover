@@ -82,9 +82,11 @@ class Subpour(object):
 
    
   def GET(self, n=None):
+    global database
     tmpl = lookup.get_template('subpours.html')
     args = dict()
     args['n'] = n
+    args['subpours'] = database.subpours
     if n==None:
       args['form_method'] = 'POST' 
     else: 
@@ -95,20 +97,25 @@ class Subpour(object):
     global database
     args['water'] = 'water' in args
     args['post_center'] = 'post_center' in args
-    n = database.next_subpour()
+    n = str(database.next_subpour())
     database.subpours[n] = db.SubpourData(**args)
     save_data()
     f = open(datafilename)
     db_ = pickle.load(open(datafilename, 'r'))
-    return 'sd' #+ str(database.subpours[n].name)
-#raise cherrypy.HTTPRedirect('/subpours/' + str(n))
+    raise cherrypy.HTTPRedirect('/subpours/' + str(n))
 
   def PUT(self, n, **args):
+    global database
+    args['water'] = 'water' in args
+    args['post_center'] = 'post_center' in args
     database.subpours[n].update(**args)
     save_data()
+    raise cherrypy.HTTPRedirect('/subpours/' + str(n))
 
   def DELETE(self, n):
+    global database
     del database.subpours[n]
+    raise cherrypy.HTTPRedirect('/subpours/')
 
 class status:
   exposed = True

@@ -1,5 +1,32 @@
 <head>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+$(function(){
+$(".deleteLink").click(function(){
+      path = $(this).attr('id');
+      $.ajax({
+        url:path,
+        type:'DELETE',
+        success: function(result){
+          window.location.href='/subpours'
+        }
+        })
+    });
+$(".updateForm").submit(function(){
+      event.preventDefault();
+      path = $(this).attr('id');
+      $.ajax({
+        url:path,
+        type:'PUT',
+        data:$(this).serialize(),
+        success: function(result){
+          window.location.href=path;
+        }
+        })
+    });
+})
+</script>
 </head>
 
 <script src="/jquery-ui/js/jquery-1.9.1.js"></script>

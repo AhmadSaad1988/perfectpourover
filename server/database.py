@@ -1,4 +1,9 @@
 import pickle
+from math import pi
+from StringIO import StringIO
+from PIL import Image
+import numpy as np
+import base64
 
 class Database():
 
@@ -26,11 +31,6 @@ class PourData():
     self.name = name
     self.subpours = subpours
 
-from math import pi
-from StringIO import StringIO
-from PIL import Image
-import numpy as np
-import base64
 class SubpourData():
   def __init__(self, name, duration, radius, r0, o0, nrots, water, post_center):
     self.name = name
@@ -61,6 +61,13 @@ class SubpourData():
     base64.encode(buf, outbuf)
     return outbuf.getvalue()
   def update(self, name, duration, radius, r0, o0, nrots, water, post_center):
-    pass
+    self.name = name
+    self.duration = int(duration) if not duration == '' else 1
+    self.radius = float(radius) if not radius == '' else 1
+    self.r0 = float(r0) if not r0 == '' else 1
+    self.o0 = float(o0) if not o0 == '' else 1
+    self.nrots = int(nrots) if not nrots == '' else 1
+    self.water = water
+    self.post_center = post_center
 
 
