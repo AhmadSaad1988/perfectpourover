@@ -30,9 +30,10 @@ $(function(){
 
   timer = setInterval(function(){
     $.get("/status", function(data) { $(".status").html(data); });
-  }, 2000);
+  }, 5000);
 
-  $('#new_subpour').submit(function(){
+  $(document).on('submit', '#new_subpour', function(){
+  //$('#new_subpour').submit(function(){
     event.preventDefault();
     $.ajax({
       type: 'POST',
@@ -54,7 +55,8 @@ $(function(){
       });
   });
 
-  $('.update_subpour').submit(function(){
+  $(document).on('submit', '.update_subpour', function(){
+  //$('.update_subpour').submit(function(){
     event.preventDefault();
     $.ajax({
       type: 'PUT',
@@ -79,6 +81,7 @@ $(function(){
             '<h3>'+ resp['name'] + '</h3>' +
             '<div>' + $('#pour_form_html').html() + '</div>' + 
           '</div>');
+          $('#pours_accord form#-1').attr('id', resp['n']);
           $('#pours_accord').accordion('refresh');
       }
       });
@@ -103,7 +106,8 @@ $(function(){
           $('#pours_accord').accordion('refresh');
   });
 
-  $('.update_pour').submit(function(){
+  $(document).on('submit', '.update_pour', function(){
+  //$('.update_pour').submit(function(){
     event.preventDefault();
     var data = $(this).serialize();
     data += "&subpours=";
@@ -123,7 +127,8 @@ $(function(){
       });
   });
 
-  $("#subpours_accord .delete_subpour").click(function() {
+  $(document).on('click', "#subpours_accord .delete_subpour", function() {
+  //$("#subpours_accord .delete_subpour").click(function() {
       var delete_button = $(this);
       $.ajax({
         type: 'DELETE',
@@ -134,7 +139,8 @@ $(function(){
       });
   });
 
-  $("#pours_accord .delete_subpour").click(function() {
+  $(document).on('click', '#pours_accord .delete_subpour', function(){
+  //$("#pours_accord .delete_subpour").click(function() {
       alert('y');
       var delete_button = $(this);
       $.ajax({
@@ -145,13 +151,15 @@ $(function(){
         }
       });
   });
-  $(".pour_sequence .delete_pour").click(function() {
+  $(document).on('click', '.pour_sequence .delete_pour', function(){
+  //$(".pour_sequence .delete_pour").click(function() {
       $(this).parent().parent().remove();
   });
 
   $('.pour_sequence').sortable();
 
-  $('.run_pour').click(function(e){
+  $(document).on('click', '.run_pour', function(e){
+  //$('.run_pour').click(function(e){
     var n = $(e.target).attr('id');
     $.ajax({
 	type: 'GET',
