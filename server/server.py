@@ -43,16 +43,14 @@ class Pour(object):
                       for num in database.subpours.keys())
 
   def GET(self, n=None):
-    if n is not None:
-      n = int(n)
     tmpl = lookup.get_template('pours.html')
     args = dict(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
     return tmpl.render(**args)
 
   def POST(self, **args):
     tmpl = lookup.get_template('pours.html')
-    n = database.next_pour()
-    subpours = map(int, args['subpours'].split(", "))
+    n = str(database.next_pour())
+    subpours = args['subpours'].split(", ")
     if not args['name'] or len(subpours) == 0:
       return self.GET()
     database.pours[n] = db.PourData(name=args['name'], subpours=subpours)
@@ -60,16 +58,14 @@ class Pour(object):
     return tmpl.render(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
 
   def PUT(self, n, **args):
-    n = int(n)
-    subpours = map(int, args['subpours'].split(", "))
+    subpours = args['subpours'].split(", ")
     if not args['name'] or len(subpours) == 0:
       return self.GET()
-    print n, type(n)
     database.pours[n].update(subpours=subpours, name=args['name'])
     save_data()
 
   def DELETE(self, n):
-    del database.pours[int(n)] 
+    del database.pours[n]
 
 class Subpour(object):
 
@@ -130,6 +126,11 @@ class status:
         resp += ", pouring for %.02f seconds" % pour_serial.pour_time
       return resp
 
+class RunPour:
+  exposed = True
+  def GET(self, n):
+    pour_serial.send_pour([database.subpours[s] for s in database.pours[n].subpours])
+
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
             }) 
@@ -143,6 +144,8 @@ cherrypy.tree.mount(Subpour(), '/subpours',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 cherrypy.tree.mount(Subpour().table, '/subpours/table')
 cherrypy.tree.mount(status(), '/status',
+{'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
+cherrypy.tree.mount(RunPour(), '/run',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 server = Server()
 cherrypy.quickstart(server, config=conf)

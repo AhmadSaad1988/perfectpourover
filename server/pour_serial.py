@@ -1,4 +1,3 @@
-from math import pi
 from StringIO import StringIO
 import logging
 import serial
@@ -9,7 +8,7 @@ import threading
 from time import sleep
 
 try:
-	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0.1)
+	ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.1)
 except OSError:
 	ser = None
 
@@ -22,6 +21,8 @@ def status_thread():
     time = None
     while True:
       byte = ser.read()
+      import sys
+      sys.stderr.write(byte)
       if byte == "\n":
         break
       else:
@@ -56,13 +57,18 @@ def serialize(subpours):
     # radius initial and rate
     buf.write('0.0\n' + str(pour.radius_rate) + '\n')
     # radius scale (in)
+    buf.write('2.0\n')
     # time and pump on or off
-    buf.write(str(float(pour.time)) + '\n1\n')
+    buf.write(str(float(pour.duration)) + '\n1\n')
     # temperature (F)
+    buf.write('200\n')
     buf.write('LINEAR\n')
     buf.write('0.0\n0.0\n')
-    buf.write('1.0\n' + str(-1.0 / pour.time_after) + '\n')
-    buf.write(str(pour.time_after) + '\n0\n')
+    radius = pour.radius_rate * pour.duration
+    buf.write(str(radius) + '\n' + str(-radius/2.0) + '\n')
+    buf.write('2.0\n')
+    buf.write('2.0\n1\n')
+    buf.write('200\n')
   buf.write('END\n')
   return buf.getvalue()
 
@@ -72,4 +78,5 @@ def send_pour(subpours):
 		return False
 	else:
 		ser.write(serialize(subpours))
+		ser.flush()
 		return True

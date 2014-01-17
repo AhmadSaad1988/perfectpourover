@@ -1,5 +1,4 @@
 import pickle
-from math import pi
 from StringIO import StringIO
 from PIL import Image
 import numpy as np
@@ -42,7 +41,7 @@ class SubpourData():
     self.water = water
     self.post_center = post_center
     #self.time_after = time_after
-    self.angle_rate = (2.0 * pi * self.nrots) / self.duration
+    self.angle_rate = (360.0 * self.nrots) / self.duration
     self.radius_rate = 1.0 / self.duration
   def draw(self):
     times = np.linspace(0, self.duration, 1024 * 8)
