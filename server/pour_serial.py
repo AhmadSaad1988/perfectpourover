@@ -26,11 +26,11 @@ def status_thread():
         break
       else:
         resp += byte
-    if resp == "Temp":
+    if resp == "TEMP":
       temp = True
-    elif resp == "Time":
+    elif resp == "TIME":
       time = True
-    elif resp == "End Pour":
+    elif resp == "END POUR":
       pour_time = None
       temp = None
       time = None
@@ -50,17 +50,20 @@ if ser is not None:
 def serialize(subpours):
   buf = StringIO()
   for pour in subpours:
-    buf.write('Linear\n')
+    buf.write('LINEAR\n')
     # theta initial and rate
     buf.write('0.0\n' + str(pour.angle_rate) + '\n')
     # radius initial and rate
     buf.write('0.0\n' + str(pour.radius_rate) + '\n')
+    # radius scale (in)
     # time and pump on or off
     buf.write(str(float(pour.time)) + '\n1\n')
-    buf.write('Linear\n')
+    # temperature (F)
+    buf.write('LINEAR\n')
     buf.write('0.0\n0.0\n')
     buf.write('1.0\n' + str(-1.0 / pour.time_after) + '\n')
     buf.write(str(pour.time_after) + '\n0\n')
+  buf.write('END\n')
   return buf.getvalue()
 
 def send_pour(subpours):
