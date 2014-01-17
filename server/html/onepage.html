@@ -90,7 +90,6 @@ $(function(){
     var subpour_add = e.target;
     var i = subpour_add.id;
     var subpour_name = $(subpour_add).siblings("h3").text();
-    //alert($(this).attr('id'));
     var active_num = $("#pours_accord").accordion("option", "active");
     var accordion = $("#pours_accord .group")[active_num];
     var pour_seq = $(accordion).find("#pour_sequence");
@@ -224,7 +223,7 @@ $(function(){
               ${forms.pour_form(n, pour)}
               <div id="pour_sequence">
                 %for i in pour.subpours:
-                  <div class="group" id="${i}">
+                  <div id="${i}">
                     <div class="pour_subpour_header">
                       <h3 class="floatleft">${db.subpours[i].name}</h3>
                       <div class="accordion_header_button delete_pour floatright" id="${i}">Delete</div>
