@@ -28,11 +28,9 @@ $(function(){
   create_accordion("#subpours_accord");
   create_accordion("#pours_accord");
 
-  /*
   timer = setInterval(function(){
     $.get("/status", function(data) { $(".status").html(data); });
-  }, 1000);
-*/
+  }, 2000);
 
   $('#new_subpour').submit(function(){
     event.preventDefault();
@@ -86,7 +84,8 @@ $(function(){
       });
   });
 
-  $('.add_subpour').click(function(e){
+  //$('.add_subpour').click(function(e){
+  $(document).on('click', '.add_subpour', function(e){
     var subpour_add = e.target;
     var i = subpour_add.id;
     var subpour_name = $(subpour_add).siblings("h3").text();

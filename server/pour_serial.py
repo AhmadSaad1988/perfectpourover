@@ -42,6 +42,8 @@ def status_thread():
       pour_time = float(resp)
       temp = None
       time = None
+    else:
+      print "'" + resp + "'"
     sleep(1)
 if ser is not None:
   status_thread_obj = threading.Thread(target=status_thread)
