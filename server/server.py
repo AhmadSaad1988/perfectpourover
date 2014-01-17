@@ -51,25 +51,27 @@ class Pour(object):
 
   def POST(self, **args):
     tmpl = lookup.get_template('pours.html')
-    n = database.next_pour()
-    subpours = map(int, args['subpours'].split(", "))
+    n = str(database.next_pour())
+    subpours = args['subpours'].split(", ")
     if not args['name'] or len(subpours) == 0:
-      return self.GET()
-    database.pours[n] = dbase.PourData(name=args['name'], subpours=subpours)
+      raise cherrypy.HTTPError(500, "Must have name and subpours")
+    database.pours[n] = dbase.PourData(name=args['name'], subpours=subpours,
+                                       weight=float(args['weight']),
+                                       temp=float(args['temp']))
     save_data()
-    return tmpl.render(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
+    return "ok"
 
   def PUT(self, n, **args):
-    n = int(n)
-    subpours = map(int, args['subpours'].split(", "))
+    subpours = args['subpours'].split(", ")
     if not args['name'] or len(subpours) == 0:
-      return self.GET()
-    print n, type(n)
+      raise cherrypy.HTTPError(500, "Must have name and subpours")
     database.pours[n].update(subpours=subpours, name=args['name'])
     save_data()
+    return "ok"
 
   def DELETE(self, n):
     del database.pours[int(n)] 
+    return "ok"
 
 class Subpour(object):
 
@@ -94,27 +96,23 @@ class Subpour(object):
     return tmpl.render(**args) 
 
   def POST(self, **args):
-    global database
     args['water'] = 'water' in args
     args['post_center'] = 'post_center' in args
     n = str(database.next_subpour())
     database.subpours[n] = dbase.SubpourData(**args)
     save_data()
-    f = open(datafilename)
-    raise cherrypy.HTTPRedirect('/subpours/' + str(n))
+    return "ok"
 
   def PUT(self, n, **args):
-    global database
     args['water'] = 'water' in args
     args['post_center'] = 'post_center' in args
     database.subpours[n].update(**args)
     save_data()
-    raise cherrypy.HTTPRedirect('/subpours/' + str(n))
+    return "ok"
 
   def DELETE(self, n):
-    global database
     del database.subpours[n]
-    raise cherrypy.HTTPRedirect('/subpours/')
+    return "ok"
 
 class status:
   exposed = True
