@@ -128,3 +128,21 @@
     </table>
   </form>
 </%def>
+<%def name="pour_form(p)">
+  <form name="pour_form">
+    <table>
+      <tr>
+        <td>Name</td>
+        <td><input type="text" name="name" value="${p.name}"></td>
+      </tr>
+      <tr>
+        <td>Weight</td>
+        <td><input type="text" name="weight" value="${p.weight}"></td>
+      </tr>
+      <tr>
+        <td>Temperature</td>
+        <td><input type="text" name="temperature" value="${p.temperature}"></td>
+      </tr>
+    </table>
+  </form>
+</%def>
