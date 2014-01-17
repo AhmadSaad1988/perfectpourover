@@ -4,6 +4,9 @@ body{
     color: black; font-size: 10pt; font-family: "Lucida Console", sans-serif;
 }
 
+.floatright{float:right}
+.floatleft{float:left}
+
 .navbar {
     background-color:#6f4e37;
     width: 100%;
@@ -52,14 +55,31 @@ body{
   border-radius:10px;
 }
 
-.group h3{
+.group .accordion_header{
   background-color:#6f4E37;
   border-bottom:3px solid #52341F;
-  margin:0px;
-  padding:5px;
   color:#FFFFFF;
   border-bottom-left-radius:10px;
   border-bottom-right-radius:10px;
+  padding:5px;
+}
+#pour_sequence .pour_subpour_header {
+  background-color:#9f6E67;
+  border-bottom:3px solid #52341F;
+  color:#FFFFFF;
+  border-bottom-left-radius:10px;
+  border-bottom-right-radius:10px;
+  padding:5px;
+}
+.group h3{
+  margin:0px;
+  color:#FFFFFF;
   font-weight:normal;
   font-size:16px;
+}
+
+.accordion_header_button{
+  margin-left:20px;
+  padding-top:2px;
+  cursor:pointer;
 }

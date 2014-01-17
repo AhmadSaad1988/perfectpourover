@@ -5,6 +5,7 @@ import pour_serial
 from mako.template import Template
 from mako.lookup import TemplateLookup
 import os, os.path
+import json
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 lookup = TemplateLookup(directories=['html'])
@@ -41,8 +42,13 @@ class Pour(object):
 
   exposed = True
 
+  @cherrypy.expose()
   def table(self):
-    pass
+    ret = "<table>"
+    for id_num, pour in database.pours.items():
+      ret += "<tr><td>" + id_num + "</td><td>" + str(pour.subpours) + "</td></tr>"
+    ret += "</table>"
+    return ret
 
   def get_subpour_names(self):
     return dict((num, database.subpours[num].name)
@@ -58,20 +64,17 @@ class Pour(object):
   def POST(self, **args):
     tmpl = lookup.get_template('pours.html')
     n = str(database.next_pour())
-    subpours = args['subpours'].split(", ")
-    if not args['name'] or len(subpours) == 0:
+    subpours = args['subpours'].split(", ") if 'subpours' in args else []
+    if not args['name']:
       raise cherrypy.HTTPError(500, "Must have name and subpours")
-    database.pours[n] = dbase.PourData(name=args['name'], subpours=subpours,
-                                       weight=float(args['weight']),
-                                       temp=float(args['temp']))
+    database.pours[n] = dbase.PourData(**args)
     save_data()
-    return "ok"
+    return json.dumps({'name':args['name'], 'n':n})
 
   def PUT(self, n, **args):
-    subpours = args['subpours'].split(", ")
-    if not args['name'] or len(subpours) == 0:
-      raise cherrypy.HTTPError(500, "Must have name and subpours")
-    database.pours[n].update(subpours=subpours, name=args['name'])
+    args['subpours'] = args['subpours'].split(", ")
+    args['name'] = database.pours[n].name;
+    database.pours[n].update(**args)
     save_data()
     return "ok"
 
@@ -102,21 +105,21 @@ class Subpour(object):
     return tmpl.render(**args) 
 
   def POST(self, **args):
-    args['water'] = 'water' in args
-    args['post_center'] = 'post_center' in args
     n = str(database.next_subpour())
     database.subpours[n] = dbase.SubpourData(**args)
     save_data()
-    return "ok"
+    return json.dumps({'name':args['name'], 'n':n})
 
   def PUT(self, n, **args):
-    args['water'] = 'water' in args
-    args['post_center'] = 'post_center' in args
+    args['name'] = database.subpours[n].name
     database.subpours[n].update(**args)
     save_data()
     return "ok"
 
   def DELETE(self, n):
+    for pour in database.pours.values():
+      if n in pour.subpours:
+        raise ValueError("nope")
     del database.subpours[n]
     return "ok"
 

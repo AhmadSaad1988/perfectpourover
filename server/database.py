@@ -27,11 +27,13 @@ class PourData():
     self.name = name
     self.weight = int(weight) if not weight in [None, ''] else 10
     self.temp = int(temp) if not temp in [None, ''] else 198
-    self.subpours = subpours if not subpours == None else ''
+    self.subpours = subpours if not subpours == None else []
 
-  def update(self, name, subpours=None):
+  def update(self, name, subpours, temperature, weight):
     self.name = name
     self.subpours = subpours
+    self.temp = temperature
+    self.weight = weight
 
 class SubpourData():
   def __init__(self, name, duration=None, radius=None, r0=None, nrots=None, water=None, direction=None):
@@ -60,12 +62,12 @@ class SubpourData():
     buf.seek(0)
     base64.encode(buf, outbuf)
     return 'data:image/png;base64,' + outbuf.getvalue()
-  def update(self, name, duration, radius, nrots, water, post_center):
+  def update(self, name, duration, radius, r0, nrots, water):
     self.name = name
     self.duration = int(duration) if not duration == '' else 1
     self.radius = float(radius) if not radius == '' else 1
+    self.r0 = float(r0) if not r0 == '' else 0
     self.nrots = int(nrots) if not nrots == '' else 1
     self.water = water
-    self.post_center = post_center
 
 
