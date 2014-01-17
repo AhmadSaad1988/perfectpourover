@@ -55,8 +55,6 @@ class Pour(object):
                       for num in database.subpours.keys())
 
   def GET(self, n=None):
-    if n is not None:
-      n = int(n)
     tmpl = lookup.get_template('pours.html')
     args = dict(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
     return tmpl.render(**args)
@@ -83,7 +81,7 @@ class Pour(object):
     return "ok"
 
   def DELETE(self, n):
-    del database.pours[int(n)] 
+    del database.pours[n] 
     return "ok"
 
 class Subpour(object):
