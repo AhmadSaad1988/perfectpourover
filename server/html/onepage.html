@@ -108,16 +108,13 @@ $(function(){
   $('.update_pour').submit(function(){
     event.preventDefault();
     var data = $(this).serialize();
+    data += "&subpours=";
     $(this).siblings("#pour_sequence").children("div").each(function(index, tag) {
       var id = tag.id;
-      if (index == 0){
-        data += "&subpours=";
-      } else {
+      if (index > 0)
         data += ", ";
-      }
       data += id;
     });
-    alert(data);
     $.ajax({
       type: 'PUT',
       url:'/pours/'+$(this).attr('id'),

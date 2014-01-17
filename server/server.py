@@ -72,7 +72,11 @@ class Pour(object):
     return json.dumps({'name':args['name'], 'n':n})
 
   def PUT(self, n, **args):
-    args['subpours'] = args['subpours'].split(", ")
+    if args['subpours'] == '':
+      args['subpours'] = []
+    else:
+      args['subpours'] = args['subpours'].split(", ")
+
     args['name'] = database.pours[n].name;
     database.pours[n].update(**args)
     save_data()
