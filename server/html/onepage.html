@@ -113,6 +113,14 @@ $(function(){
             <div class="create_new">Add</div>
           </form>
         </div>
+
+        <div id="pours_accord">
+          % for (id, pour) in db.pours.items():
+          <div class="group">
+            <h3>${id} - ${pour.name}</h3>
+          </div>
+          % endfor
+        </div>
       </div>
     </td>
   
