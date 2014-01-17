@@ -27,12 +27,35 @@ $(function(){
       });
   }
   create_accordian("#subpours_accord");
-});
 
-$(function() {
   timer = setInterval(function(){
     $.get("/status", function(data) { $(".status").html(data); });
   }, 1000);
+
+
+  $('#new_subpour').submit(function(){
+    event.preventDefault();
+    $.ajax({
+      type: 'POST',
+      url:'/subpours',
+      data: $(this).serialize(),
+      success: function(response){
+        //put 
+      }
+      });
+  });
+
+  $('.update_subpour').submit(function(){
+    event.preventDefault();
+    $.ajax({
+      type: 'PUT',
+      url:'/subpours'+$(this).attr('id'),
+      data: $(this).serialize(),
+      success: function(response){
+        //put 
+      }
+      });
+  });
 });
 
 </script>
