@@ -77,9 +77,16 @@ $(function(){
       data: $(this).serialize(),
       success: function(response){
           var resp = $.parseJSON(response);
-          $('#pours_accord').prepend('<div class="group" id="'+resp['n']+'">' + 
-            '<h3>'+ resp['name'] + '</h3>' +
-            '<div>' + $('#pour_form_html').html() + '</div>' + 
+          $('#pours_accord').prepend('<div class="group" id="'+resp['n']+'">' + 	    
+	'<div class="accordion_header">'+
+            '<h3 class="floatleft">'+ resp['name'] + '</h3>' +
+	'       <div class="accordion_header_button delete_subpour floatright" id="'+resp['n']+'">Delete</div>'+
+              '<div class="accordion_header_button run_pour floatright" id="'+resp['n']+'">Run</div>' +
+              '<br clear="all"/>'+
+            '</div>' +
+
+
+            '<div>' + $('#pour_form_html').html() + '<div class="pour_sequence"></div></div>' + 
           '</div>');
           $('#pours_accord form#-1').attr('id', resp['n']);
           $('#pours_accord').accordion('refresh');
