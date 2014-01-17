@@ -1,4 +1,4 @@
-<%namespace name="forms" file="forms-onepage.html"/>
+<%namespace name="forms" file="forms-fns-onepage.html"/>
 <head>
 <link rel="stylesheet" type="text/css" href="/css/style-onepage.css">
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -128,5 +128,6 @@ $(function(){
 </table>
 
 
-
-<%include file="forms-onepage.html" />
+<div style="visibility:hidden" id="subpour_form_html">
+  ${forms.subpour_form(-1, default_subpour)}
+</div>

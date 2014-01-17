@@ -28,7 +28,13 @@ class Server(object):
   def index(self):
     global database
     tmpl = lookup.get_template('onepage.html')
-    return tmpl.render(db = database)
+    default_subpour = dbase.SubpourData('')
+    default_pour = dbase.PourData('')
+    args = dict()
+    args['db'] = database
+    args['default_subpour'] = default_subpour
+    args['default_pour'] = default_pour
+    return tmpl.render(**args)
 
 
 class Pour(object):

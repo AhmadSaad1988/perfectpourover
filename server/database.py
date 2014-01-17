@@ -23,9 +23,11 @@ class Database():
 
 class PourData():
 
-  def __init__(self, name, weight, subpours=None):
+  def __init__(self, name, weight=None, temp=None, subpours=None):
     self.name = name
-    self.subpours = subpours
+    self.weight = int(weight) if not weight in [None, ''] else 10
+    self.temp = int(temp) if not temp in [None, ''] else 198
+    self.subpours = subpours if not subpours == None else ''
 
   def update(self, name, subpours=None):
     self.name = name
@@ -35,10 +37,11 @@ class SubpourData():
   def __init__(self, name, duration=None, radius=None, r0=None, nrots=None, water=None, direction=None):
     self.name = name
     self.duration = int(duration) if not duration in ['', None] else 1
+    self.r0 = float(r0) if not r0 in ['', None] else 0.0
     self.radius = float(radius) if not radius in ['', None] else 1.0
     self.nrots = int(nrots) if not nrots in ['',None] else 1
     self.water = float(water) if not water in ['', None] else 1.0
-    self.direction = int(direction) if not direction in ['', None], else 1
+    self.direction = int(direction) if not direction in ['', None] else 1
     self.angle_rate = (2.0 * pi * self.nrots) / self.duration
     self.radius_rate = 1.0 / self.duration
   def draw(self):
