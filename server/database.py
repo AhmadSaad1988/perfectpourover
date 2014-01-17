@@ -23,7 +23,7 @@ class Database():
 
 class PourData():
 
-  def __init__(self, name, subpours=None):
+  def __init__(self, name, weight, subpours=None):
     self.name = name
     self.subpours = subpours
 
@@ -32,12 +32,10 @@ class PourData():
     self.subpours = subpours
 
 class SubpourData():
-  def __init__(self, name, duration, radius, r0, o0, nrots, water, post_center):
+  def __init__(self, name, duration, radius, r0, nrots, water, direction):
     self.name = name
     self.duration = int(duration) if not duration == '' else 1
     self.radius = float(radius) if not radius == '' else 1
-    self.r0 = float(r0) if not r0 == '' else 1
-    self.o0 = float(o0) if not o0 == '' else 1
     self.nrots = int(nrots) if not nrots == '' else 1
     self.water = water
     self.post_center = post_center
@@ -47,7 +45,7 @@ class SubpourData():
   def draw(self):
     times = np.linspace(0, self.duration, 1024 * 8)
     angles = self.o0 + times * self.angle_rate
-    radii = self.r0 + times * self.radius_rate
+    radii = times * self.radius_rate
     image = np.empty((200, 200), np.uint8)
     image[:] = 255
     xs = np.rint(radii * np.cos(angles) * 99 + 100).astype(int)
@@ -60,12 +58,10 @@ class SubpourData():
     buf.seek(0)
     base64.encode(buf, outbuf)
     return outbuf.getvalue()
-  def update(self, name, duration, radius, r0, o0, nrots, water, post_center):
+  def update(self, name, duration, radius, nrots, water, post_center):
     self.name = name
     self.duration = int(duration) if not duration == '' else 1
     self.radius = float(radius) if not radius == '' else 1
-    self.r0 = float(r0) if not r0 == '' else 1
-    self.o0 = float(o0) if not o0 == '' else 1
     self.nrots = int(nrots) if not nrots == '' else 1
     self.water = water
     self.post_center = post_center

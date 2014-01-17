@@ -1,6 +1,6 @@
 import cherrypy
 import pickle
-import database as db
+import database as dbase
 import pour_serial
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -14,21 +14,21 @@ datafilename = 'data.pkl'
 try:
   database = pickle.load(open(datafilename, 'r'))
 except IOError:
-  database = db.Database()
+  database = dbase.Database()
 
 
 
 def save_data():
   global database
   pickle.dump(database, open(datafilename, 'w'))
-  dbase = pickle.load(open(datafilename, 'r'))
 
 class Server(object):
 
   @cherrypy.expose()
   def index(self):
-    tmpl = lookup.get_template('header.html')
-    return tmpl.render()
+    global database
+    tmpl = lookup.get_template('onepage.html')
+    return tmpl.render(db = database)
 
 
 class Pour(object):
@@ -55,7 +55,7 @@ class Pour(object):
     subpours = map(int, args['subpours'].split(", "))
     if not args['name'] or len(subpours) == 0:
       return self.GET()
-    database.pours[n] = db.PourData(name=args['name'], subpours=subpours)
+    database.pours[n] = dbase.PourData(name=args['name'], subpours=subpours)
     save_data()
     return tmpl.render(subpour_names=self.get_subpour_names(), n=n, pours=database.pours)
 
@@ -98,10 +98,9 @@ class Subpour(object):
     args['water'] = 'water' in args
     args['post_center'] = 'post_center' in args
     n = str(database.next_subpour())
-    database.subpours[n] = db.SubpourData(**args)
+    database.subpours[n] = dbase.SubpourData(**args)
     save_data()
     f = open(datafilename)
-    db_ = pickle.load(open(datafilename, 'r'))
     raise cherrypy.HTTPRedirect('/subpours/' + str(n))
 
   def PUT(self, n, **args):
@@ -129,7 +128,8 @@ cherrypy.config.update({'server.socket_host': '127.0.0.1',
              'server.socket_port': 9999, 
             }) 
 conf = {'/css': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'css')},
-        '/jquery-ui': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'jquery-ui')}}
+        '/jquery-ui': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'jquery-ui')},
+        '/js': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'js')}}
 
 cherrypy.tree.mount(Pour(), '/pours',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})

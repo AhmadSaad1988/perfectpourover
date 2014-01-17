@@ -1,0 +1,130 @@
+<%def name="subpour_form(sp)">
+  <form name="subpour_form">
+    <table>
+      <tr>
+        <td>Name</td>
+        <td><input type="text" name="name" value="${sp.name}"/></td>
+      </tr>
+      <tr>
+        <td>Duration</td>
+        <td><input type="text" name="duration" value="${sp.duration}"/></td>
+      </tr>
+      <tr>
+        <td>Radius</td>
+        <td><input type="text" name="radius" value="${sp.radius}"/></td>
+      </tr>
+      <tr>
+        <td>Initial Radius</td>
+        <td><input type="text" name="r0" value="${sp.r0}"/></td>
+      </tr>
+      <tr>
+        <td>Rotations</td>
+        <td><input type="text" name="nrots" value="${sp.nrots}"/></td>
+      </tr>
+      <tr>
+        <td>Water rate</td>
+        <td><input type="text" name="water" value="${sp.water}"/></td>
+      </tr>
+      <tr>
+        <td>Direction</td>
+        <td>
+          <input type="radio" name="direction" value="1" />Outwards<br/>
+          <input type="radio" name="direction" value="-1" />Inwards<br/>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" /></td>
+      </tr>
+    </table>
+  </form>
+</%def>
+
+<%def name="pour_form()">
+  <script>
+    $(function() {
+      $("#pour_list").sortable();
+      $("#pour_list").disableSelection();
+
+      var html = "";
+      for (var num in subpour_names) {
+        html += "<li id='" + num.toString() + "'>" + subpour_names[num] + "</li>";
+      }
+      $("#all_subpours").append(html);
+      $("#all_subpours li").click(function(e) {
+        var id_num = parseInt(e.target.id);
+        var delete_button = "delete_" + id_num.toString();
+        var subpour_item = $("<li/>", {
+              class: id_num.toString(),
+              text: subpour_names[id_num]
+        });
+        var delete_button = $("<a/>", {
+              href: "#",
+              text: "delete",
+              click: function(e) {
+                  $(e.target).parent().remove();
+              }
+        });
+        subpour_item.append(" ");
+        subpour_item.append(delete_button);
+        $("#pour_list").append(subpour_item);
+      });
+      $("#create_pour").click(function(e) {
+        // Add list of pours as hidden input
+        var subpour_string = "";
+        $("#pour_list li").each(function(index) {
+            if (index > 0) {
+                subpour_string += ", ";
+            }
+            subpour_string += $(this).attr('class');
+        });
+        $("#pour_form").append($("<input/>", {
+            type: 'hidden',
+            name: 'subpours',
+            value: subpour_string
+        }));
+
+        % if n is not None:
+          // We need to submit PUT request over AJAX
+          e.preventDefault();
+          $.ajax({
+            type: "PUT",
+            url: "/pours/${n}",
+            data: $("#pour_form").serialize(),
+            success: function() {
+              location.reload();
+            }
+          });
+        % endif
+      });
+    });
+  </script>
+  <form action="/pours" method="POST" id="pour_form">
+    <table>
+      <tr>
+        <td>Name</td>
+        <td><input type="text" name="name" value="${"" if n is None else pours[n].name}"></td>
+      </tr>
+      <tr>
+        <td>
+          <p>Subpours in this pour:
+          <ul id="pour_list">
+            % if n is not None:
+              % for pour_id in pours[n].subpours:
+                <li class="${pour_id}">${subpour_names[pour_id]}</li>
+              % endfor
+            % endif
+          </ul>
+        </td>
+        <td>
+          Available subpours (click to add):
+          <ul id="all_subpours">
+          </ul>
+        </td>
+      </tr>
+      <tr><td>
+        <input type="submit" value="${"Create" if n is None else "Update"} Pour" id="create_pour">
+      </td></tr>
+    </table>
+  </form>
+</%def>

@@ -1,0 +1,101 @@
+<%namespace name="forms" file="forms-onepage.html"/>
+<head>
+<link rel="stylesheet" type="text/css" href="/css/style-onepage.css">
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+
+<script src="/jquery-ui/js/jquery-1.9.1.js"></script>
+<script src="/jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript">
+
+
+$(function(){
+  function create_accordian(str) {
+    $( str )
+      .accordion({
+        header: '> div > h3',
+        autoHeight: false  // set this to false
+      })
+      .sortable({
+        axis: 'y',
+        handle: 'h3',
+        stop: function( event, ui ) {
+            // IE doesn't register the blur when sorting
+            // so trigger focusout handlers to remove .ui-state-focus
+            ui.item.children( 'h3' ).triggerHandler( 'focusout' );
+        }
+      });
+  }
+  create_accordian("#subpours_accord");
+});
+
+$(function() {
+  timer = setInterval(function(){
+    $.get("/status", function(data) { $(".status").html(data); });
+  }, 1000);
+});
+
+</script>
+
+</head>
+<div class="navbar">
+    <div class="logo">
+        PERFECT POUR OVER
+    </div>
+    <div class="link status">
+        Connecting to server...
+    </div>
+</div>
+
+<br clear="all">
+
+<table width="100%">
+  <tr>
+
+    <td width="50%" valign=top>
+      <div class="td_container">
+        <div class="header">
+          Subpours
+        </div>
+        
+        <div class="create_new_container">
+          <form id="new_subpour">
+            <input style="float:left" type="text" name="name" />
+            <div class="create_new">Add</div>
+          </form>
+        </div>
+
+        <div id="subpours_accord">
+          <div class="group">
+            <h3>1</h3>
+            <div>asdfadsf</div>
+          </div>
+          <div class="group">
+            <h3>3</h3>
+            <div>asdfadsf</div>
+          </div>
+        </div>
+      </div>
+    </td>
+
+    <td width="50%" valign=top>
+      <div class="td_container">
+        <div class="header">
+          Pours
+        </div>
+
+        <div class="create_new_container">
+          <form id="new_pour">
+            <input style="float:left" type="text" name="name" />
+            <div class="create_new">Add</div>
+          </form>
+        </div>
+      </div>
+    </td>
+  
+  </tr>
+</table>
+
+
+
+<%include file="forms-onepage.html" />
