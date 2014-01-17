@@ -152,8 +152,15 @@ $(function(){
 
   $('.pour_sequence').sortable();
 
-  $('.run_pour').click(function(){
-    alert('running');     
+  $('.run_pour').click(function(e){
+    var n = $(e.target).attr('id');
+    $.ajax({
+	type: 'GET',
+	url: '/run/' + n,
+	success: function() {
+		alert('running')
+	}
+    });
   });
 
 

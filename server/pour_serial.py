@@ -56,13 +56,11 @@ def serialize(subpours):
     # radius initial and rate
     buf.write('0.0\n' + str(pour.radius_rate) + '\n')
     # radius scale (in)
+    buf.write('2\n') # XXX
     # time and pump on or off
-    buf.write(str(float(pour.time)) + '\n1\n')
+    buf.write(str(float(pour.duration)) + '\n' + ('1' if pour.water else '0') + '\n')
     # temperature (F)
-    buf.write('LINEAR\n')
-    buf.write('0.0\n0.0\n')
-    buf.write('1.0\n' + str(-1.0 / pour.time_after) + '\n')
-    buf.write(str(pour.time_after) + '\n0\n')
+    buf.write('200\n')
   buf.write('END\n')
   return buf.getvalue()
 

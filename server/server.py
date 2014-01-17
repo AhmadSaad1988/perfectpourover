@@ -138,6 +138,12 @@ class status:
         resp += ", pouring for %.02f seconds" % pour_serial.pour_time
       return resp
 
+class RunPour:
+  exposed = True
+  def GET(self, n):
+    pour_serial.send_pour([database.subpours[s] for s in database.pours[n].subpours])
+    return "ok"
+
 cherrypy.config.update({'server.socket_host': '127.0.0.1', 
              'server.socket_port': 9999, 
             }) 
@@ -152,6 +158,8 @@ cherrypy.tree.mount(Subpour(), '/subpours',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 cherrypy.tree.mount(Subpour().table, '/subpours/table')
 cherrypy.tree.mount(status(), '/status',
+{'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
+cherrypy.tree.mount(RunPour(), '/run',
 {'/' : {'request.dispatch' : cherrypy.dispatch.MethodDispatcher()}})
 server = Server()
 cherrypy.quickstart(server, config=conf)
