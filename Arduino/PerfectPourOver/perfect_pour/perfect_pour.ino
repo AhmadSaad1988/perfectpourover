@@ -292,7 +292,6 @@ pour_t* receive_pour_sequence()
           pour -> temp = atoi(serial_buf);
           break;
       }
-
     }
     
     if (pour_seq != NULL)
@@ -301,7 +300,7 @@ pour_t* receive_pour_sequence()
       while (tmp -> next_pour != NULL)
         tmp = tmp -> next_pour;
       tmp -> next_pour = pour;
-    }else 
+    } else 
       pour_seq = pour;
     pour = NULL;
     memset(serial_buf,0x0,serial_bufsize);
@@ -330,21 +329,22 @@ void spiral()
     Serial.println(elapsed_time);
     last_sent = elapsed_time;
   }
-    // begin timer
+  
+  // begin timer
   float delta_time,next_radius,next_angle;
   delta_time = (millis() - pour_start)/1000.0; 
-
   if (delta_time >= seq -> time) 
   {
+    susan_angle = 0;
     if (seq == NULL)
     {
       pour_attached = false;
       Serial.println(DONE_POUR_COMMAND);
       pour_time = -1;
-      Astepper1.disableOutputs();
+      //Astepper1.disableOutputs();
     }
-    //stepper -> release();
-    //pump ->run(RELEASE);
+    stepper -> release();
+    pump -> run(RELEASE);
     digitalWrite(PUMP_LED_PIN,LOW);
     pour_t *tmp = seq;
     seq = seq -> next_pour;
@@ -352,6 +352,7 @@ void spiral()
     pour_start = -1;
     return;
   }
+  
   next_radius = seq -> radius_init * seq -> radius_scale + seq -> radius_rate * seq -> radius_scale * delta_time;
   next_angle = (seq -> theta_init + seq -> theta_rate * delta_time);
   if (next_angle > 360)
@@ -375,27 +376,27 @@ void go_to(float r, float theta)
   servo.write(servo_angle);
   
   // calculate number of steps for stepper motor to take
-//  if (susan_angle <= theta)
-//    delta_step_angle = (theta - susan_angle);
-//  else 
-//    delta_step_angle = (theta + 360 - susan_angle);
   if (susan_angle <= theta)
-    delta_step_angle = (theta + susan_angle);
+    delta_step_angle = (theta - susan_angle);
   else 
-    delta_step_angle = (theta - 360 +susan_angle);
+    delta_step_angle = (theta + 360 - susan_angle);
+//  if (susan_angle <= theta)
+//    delta_step_angle = (theta + susan_angle);
+//  else 
+//    delta_step_angle = (theta - 360 +susan_angle);
   delta_steps = (angle_to_steps(delta_step_angle,N_STEPS,STEP_RATIO));
   Serial.println(delta_step_angle);
   Serial.println(delta_steps);
   if ( delta_steps > 0) 
   {
-      //stepper -> step(delta_steps, FORWARD, DOUBLE);
+      stepper -> step(delta_steps, FORWARD, DOUBLE);
       //Astepper1.move(delta_steps);
-      Astepper1.moveTo(delta_steps);
+//      Astepper1.moveTo(delta_steps);
   }
   
   //update current radius and angle
   arm_radius = round(r);
-  susan_angle = ((int)theta) % 360;
+  susan_angle = ((int)theta);
 }
 
 // servo arm calculations
