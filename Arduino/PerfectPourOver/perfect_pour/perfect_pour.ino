@@ -16,6 +16,8 @@
 
 #define DEFAULT_TEMP   200
 
+#define BAUD_RATE  9600
+
 // SERIAL POUR ORDER DEFINES
 #define N_POUR_PARAMS  8
 #define THETA_INITIAL  0
@@ -33,7 +35,7 @@
 #define START_POUR_COMMAND   "LINEAR"
 #define END_POUR_COMMAND     "END"
 #define DONE_POUR_COMMAND    "END POUR"
-#define TIME_COMMAND         "TIME"
+#define TIME_COMMAND         "TIME\n"
 
 
 // TEMP DEFINES
@@ -64,7 +66,9 @@
 String input_string = "";         // a string to hold incoming data
 boolean string_complete = false;  // whether the string is complete
 long temp_time;
+
 int serial_bufsize;
+
 // One Wire interface for temp senosr
 OneWire temp_wire(TEMP_PIN);  // on pin 10
 float temp;
@@ -161,7 +165,7 @@ void stop_actuation()
 }
 
 void loop()
-{
+{ 
   on_switch = digitalRead(ON_SWITCH_PIN);
   if (on_switch) 
     digitalWrite(POWER_LED_PIN,HIGH);
@@ -173,14 +177,16 @@ void loop()
     
   if (string_complete)
   {
+   
     if (input_string == START_POUR_COMMAND)
     {
+      Serial.println("Receiving Pour Sequence");
       seq = receive_pour_sequence();
       if (seq != NULL) {
         temp_setpoint = seq ->temp;
-        Serial.println("Received NULL sequence");
-      } else {
         Serial.println("Received sequence");
+      } else {
+        Serial.println("Received NULL sequence");
       }
       send_temp();
     }
@@ -188,10 +194,13 @@ void loop()
     {
       Serial.println("Received stop command");
       stop_actuation();
+    } else 
+    {
+      Serial.println("Unrecognized Command");
     }
     input_string = "";
     string_complete = false;
-  }
+  } 
   
   if (seq != NULL) {
     if (pour_attached)
@@ -210,8 +219,12 @@ void loop()
       pour_tic = pour_time;
       Astepper1.enableOutputs();
       spiral();
+    } else 
+    {
+      Serial.println("Setpoint not met");
     }
   }
+  
   long tmp = millis()/1000;
   if(tmp - temp_time >= 1){
     send_temp();
@@ -259,6 +272,7 @@ pour_t* receive_pour_sequence()
     {
       memset(serial_buf,0x0,serial_bufsize);
       Serial.readBytesUntil('\n', serial_buf, serial_bufsize);
+      Serial.println(serial_buf);
       
       if (strcmp(serial_buf,STOP_COMMAND) == 0)
       {
@@ -325,7 +339,8 @@ void spiral()
   long elapsed_time = (millis() - pour_time)/1000 ;
   if (elapsed_time > last_sent)
   {
-    Serial.println(TIME_COMMAND);
+    Serial.print(TIME_COMMAND);
+    char buf[50];
     Serial.println(elapsed_time);
     last_sent = elapsed_time;
   }
@@ -360,7 +375,7 @@ void spiral()
   //Astepper1.setSpeed(STEP_RATIO*seq->theta_rate*60.0/360.0);
   //Serial.println(next_angle);
   go_to(next_radius, next_angle);
-  
+  Serial.println("spiraling");
 }
 
 void go_to(float r, float theta)
@@ -501,7 +516,7 @@ void send_temp()
   temp = temp * 1.8 + 32;
   Serial.println(TEMP_COMMAND);
   Serial.println(temp);
-  if ((temp < (temp_setpoint-TEMP_DELTA)) || (temp > (temp_setpoint+TEMP_DELTA))) {
+  if ((temp > (temp_setpoint-TEMP_DELTA)) && (temp < (temp_setpoint+TEMP_DELTA))) {
     digitalWrite(WATER_TEMP_LED_PIN,LOW);
     setpoint_met = false;
   } else {
@@ -519,20 +534,25 @@ void temp_setup()
 void serial_setup()
 {
   input_string.reserve(200);
-  Serial.begin(9600);
+  Serial.begin(BAUD_RATE);
 }
 
 void serialEvent() {
   while (Serial.available()) {
+    if (string_complete) {
+      break;
+    }
+    
     // get the new byte:
     char inChar = (char)Serial.read(); 
+    
     // add it to the input_string:
-    if (inChar == '\n') 
-    {
+    if (inChar == '\n') {
       string_complete = true;
       break;
-    }else 
+    } else {
       input_string += inChar;
+    }
   }
 }
 

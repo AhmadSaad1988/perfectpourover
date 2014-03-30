@@ -8,13 +8,17 @@ import threading
 from time import sleep
 
 try:
-	ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.1)
+	ser = serial.Serial('/dev/tty.usbmodem621', 9600, timeout=0.1)
 except OSError:
 	ser = None
 
+global temperature 
 temperature = None
+global pour_time 
 pour_time = None
 def status_thread():
+  global temperature
+  global pour_time
   while True:
     resp = ""
     temp = None
@@ -27,20 +31,20 @@ def status_thread():
         break
       else:
         resp += byte
-    if resp == "TEMP":
+    if resp.rstrip() == "TEMP":
       temp = True
-    elif resp == "TIME":
+    elif resp.rstrip() == "TIME":
       time = True
-    elif resp == "END POUR":
+    elif resp.rstrip() == "END POUR":
       pour_time = None
       temp = None
       time = None
     elif temp is True:
-      temperature = float(resp)
+      temperature = float(resp.rstrip())
       temp = None
       time = None
     elif time is True:
-      pour_time = float(resp)
+      pour_time = float(resp.rstrip())
       temp = None
       time = None
     sleep(1)
