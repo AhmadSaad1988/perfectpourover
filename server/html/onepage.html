@@ -1,0 +1,280 @@
+<%namespace name="forms" file="forms-fns-onepage.html"/>
+<head>
+<link rel="stylesheet" type="text/css" href="/css/style-onepage.css">
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+
+<script src="/jquery-ui/js/jquery-1.9.1.js"></script>
+<script src="/jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript">
+
+$(function(){
+  function create_accordion(str) {
+    $( str )
+      .accordion({
+        header: '> div > div.accordion_header',
+        autoHeight: false  // set this to false
+      })
+      .sortable({
+        axis: 'y',
+        handle: 'h3',
+        stop: function( event, ui ) {
+            // IE doesn't register the blur when sorting
+            // so trigger focusout handlers to remove .ui-state-focus
+            ui.item.children( 'h3' ).triggerHandler( 'focusout' );
+        }
+      });
+  }
+  create_accordion("#subpours_accord");
+  create_accordion("#pours_accord");
+
+  timer = setInterval(function(){
+    $.get("/status", function(data) { $(".status").html(data); });
+  }, 5000);
+
+  $(document).on('submit', '#new_subpour', function(){
+  //$('#new_subpour').submit(function(){
+    event.preventDefault();
+    $.ajax({
+      type: 'POST',
+      url:'/subpours',
+      data: $(this).serialize(),
+      success: function(response){
+          var resp = $.parseJSON(response);
+          var form_str = $('#subpour_form_html').html();
+          $('#subpours_accord').prepend('<div class="group" id="'+resp['n']+'">' +
+            '<div class="accordion_header">' +
+            '<h3 class="floatleft">'+ resp['name'] + '</h3>' +
+            '<div class="accordion_header_button delete_subpour floatright" id="' + resp.n + '">Delete</div>' +
+            '<div class="accordion_header_button add_subpour floatright" id="' + resp.n + '">Add</div>' +
+            '<br clear="all"></div>' + form_str  + 
+          '</div>');
+          $('#subpours_accord form#-1').attr('id', resp.n);
+          $('#subpours_accord').accordion('refresh');
+      }
+      });
+  });
+
+  $(document).on('submit', '.update_subpour', function(){
+  //$('.update_subpour').submit(function(){
+    event.preventDefault();
+    $.ajax({
+      type: 'PUT',
+      url:'/subpours/'+$(this).attr('id'),
+      data: $(this).serialize(),
+      success: function(response){
+        //put 
+      }
+      });
+  });
+
+
+  $('#new_pour').submit(function(){
+    event.preventDefault();
+    $.ajax({
+      type: 'POST',
+      url:'/pours',
+      data: $(this).serialize(),
+      success: function(response){
+          var resp = $.parseJSON(response);
+          $('#pours_accord').prepend('<div class="group" id="'+resp['n']+'">' + 	    
+	'<div class="accordion_header">'+
+            '<h3 class="floatleft">'+ resp['name'] + '</h3>' +
+	'       <div class="accordion_header_button delete_subpour floatright" id="'+resp['n']+'">Delete</div>'+
+              '<div class="accordion_header_button run_pour floatright" id="'+resp['n']+'">Run</div>' +
+              '<br clear="all"/>'+
+            '</div>' +
+
+
+            '<div>' + $('#pour_form_html').html() + '<div class="pour_sequence"></div></div>' + 
+          '</div>');
+          $('#pours_accord form#-1').attr('id', resp['n']);
+          $('#pours_accord').accordion('refresh');
+      }
+      });
+  });
+
+  //$('.add_subpour').click(function(e){
+  $(document).on('click', '.add_subpour', function(e){
+    var subpour_add = e.target;
+    var i = subpour_add.id;
+    var subpour_name = $(subpour_add).siblings("h3").text();
+    var active_num = $("#pours_accord").accordion("option", "active");
+    var accordion = $("#pours_accord .group")[active_num];
+    var pour_seq = $(accordion).find(".pour_sequence");
+    var header = $("<div/>", {class: "pour_subpour_header"});
+    header.append($("<h3/>", {class: "floatleft", text: subpour_name}));
+    header.append($("<div/>", {class: "accordion_header_button delete_pour floatright",
+                               id: i, text: "Delete"}));
+    header.append($("<br/>", {clear: "all"}));
+    var outer_div = $("<div/>", {id: i});
+    outer_div.append(header);
+    pour_seq.append(outer_div);
+          $('#pours_accord').accordion('refresh');
+  });
+
+  $(document).on('submit', '.update_pour', function(){
+  //$('.update_pour').submit(function(){
+    event.preventDefault();
+    var data = $(this).serialize();
+    data += "&subpours=";
+    $(this).siblings(".pour_sequence").children("div").each(function(index, tag) {
+      var id = tag.id;
+      if (index > 0)
+        data += ", ";
+      data += id;
+    });
+    $.ajax({
+      type: 'PUT',
+      url:'/pours/'+$(this).attr('id'),
+      data: data,
+      success: function(response){
+        //put 
+      }
+      });
+  });
+
+  $(document).on('click', "#subpours_accord .delete_subpour", function() {
+  //$("#subpours_accord .delete_subpour").click(function() {
+      var delete_button = $(this);
+      $.ajax({
+        type: 'DELETE',
+        url: '/subpours/' + $(delete_button).attr('id'),
+        success: function() {
+          $(delete_button).parent().parent().remove();
+        }
+      });
+  });
+
+  $(document).on('click', '#pours_accord .delete_subpour', function(){
+  //$("#pours_accord .delete_subpour").click(function() {
+      var delete_button = $(this);
+      $.ajax({
+        type: 'DELETE',
+        url: '/pours/' + $(delete_button).attr('id'),
+        success: function() {
+          $(delete_button).parent().parent().remove();
+        }
+      });
+  });
+  $(document).on('click', '.pour_sequence .delete_pour', function(){
+  //$(".pour_sequence .delete_pour").click(function() {
+      $(this).parent().parent().remove();
+  });
+
+  $('.pour_sequence').sortable();
+
+  $(document).on('click', '.run_pour', function(e){
+  //$('.run_pour').click(function(e){
+    var n = $(e.target).attr('id');
+    $.ajax({
+	type: 'GET',
+	url: '/run/' + n,
+	success: function() {
+		alert('running')
+	}
+    });
+  });
+
+
+});
+
+</script>
+
+</head>
+<div class="navbar">
+    <div class="logo">
+        PERFECT POUR OVER
+    </div>
+    <div class="link status">
+        Connecting to server...
+    </div>
+</div>
+
+<br clear="all">
+
+<table width="100%">
+  <tr>
+
+    <td width="50%" valign=top>
+      <div class="td_container">
+        <div class="header">
+          Subpours
+        </div>
+        
+        <div class="create_new_container">
+          <form id="new_subpour">
+            <input style="float:left" type="text" name="name" />
+            <input type="submit" value="Add" class="create_new"/>
+          </form>
+        </div>
+
+        <div id="subpours_accord">
+          %for (n,sp) in db.subpours.items():
+          <div class="group" id="${n}">
+            <div class="accordion_header">
+              <h3 class="floatleft">${sp.name}</h3>
+                <div class="accordion_header_button delete_subpour floatright" id="${n}">Delete</div>
+                <div class="accordion_header_button add_subpour floatright" id="${n}">Add</div>
+              <br clear="all"/>
+            </div>
+            ${forms.subpour_form(n, sp)}
+          </div>
+          %endfor
+        </div>
+      </div>
+    </td>
+
+    <td width="50%" valign=top>
+      <div class="td_container">
+        <div class="header">
+          Pours
+        </div>
+
+        <div class="create_new_container">
+          <form id="new_pour">
+            <input style="float:left" type="text" name="name" />
+            <input type="submit" value="Add" class="create_new"/>
+          </form>
+        </div>
+
+        <div id="pours_accord">
+          % for (n, pour) in db.pours.items():
+          <div class="group" id="${n}">
+            <div class="accordion_header">
+              <h3 class="floatleft">${pour.name}</h3>
+              <div class="accordion_header_button delete_subpour floatright" id="${n}">Delete</div>
+              <div class="accordion_header_button run_pour floatright" id="${n}">Run</div>
+              <br clear="all"/>
+            </div>
+            <div>
+              ${forms.pour_form(n, pour)}
+              <div class="pour_sequence">
+                %for i in pour.subpours:
+                  <div id="${i}" class="subpour_item">
+                    <div class="pour_subpour_header">
+                      <h3 class="floatleft">${db.subpours[i].name}</h3>
+                      <div class="accordion_header_button delete_pour floatright" id="${i}">Delete</div>
+                      <br clear="all" />  
+                    </div>
+                  </div>
+                %endfor
+              </div>
+            </div>
+          </div>
+          % endfor
+        </div>
+      </div>
+    </td>
+  
+  </tr>
+</table>
+
+
+<div style="visibility:hidden" id="subpour_form_html">
+  ${forms.subpour_form(-1, default_subpour)}
+</div>
+
+<div style="visibility:hidden" id="pour_form_html">
+  ${forms.pour_form(-1, default_pour)}
+</div>

@@ -5,10 +5,9 @@
   <td>Duration</td>
   <td>Radius</td>
   <td>Init Radius</td>
-  <td>Init Theta</td>
   <td>Num Rots</td>
   <td>Water</td>
-  <td>Post Center</td>
+  <td>Direction</td>
 </tr>
 %for n,sp in subpours.items():
   <tr>
@@ -17,10 +16,9 @@
     <td>${sp.duration}</td>
     <td>${sp.radius}</td>
     <td>${sp.r0}</td>
-    <td>${sp.o0}</td>
     <td>${sp.nrots}</td>
     <td>${sp.water}</td>
-    <td>${sp.post_center}</td>
+    <td>${sp.direction}</td>
   </tr>
 %endfor
 </table>

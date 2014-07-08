@@ -1,0 +1,49 @@
+<%def name="subpour_form(n, sp)">
+  <form id="${n}" name="subpour_form" class="update_subpour">
+    <table>
+      <tr>
+        <td>Duration</td>
+        <td><input type="text" name="duration" value="${sp.duration}"/></td>
+      </tr>
+      <tr>
+        <td>Radius</td>
+        <td><input type="text" name="radius" value="${sp.radius}"/></td>
+      </tr>
+      <tr>
+        <td>Initial Radius</td>
+        <td><input type="text" name="r0" value="${sp.r0}"/></td>
+      </tr>
+      <tr>
+        <td>Rotations</td>
+        <td><input type="text" name="nrots" value="${sp.nrots}"/></td>
+      </tr>
+      <tr>
+        <td>Water rate</td>
+        <td><input type="text" name="water" value="${sp.water}"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Update"/></td>
+      </tr>
+    </table>
+  </form>
+</%def>
+
+<%def name="pour_form(n, p)">
+  <form id="${n}" name="pour_form" class="update_pour">
+    <table>
+      <tr>
+        <td>Weight</td>
+        <td><input type="text" name="weight" value="${p.weight}"></td>
+      </tr>
+      <tr>
+        <td>Temperature</td>
+        <td><input type="text" name="temperature" value="${p.temp}"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Update"/></td>
+      </tr>
+    </table>
+  </form>
+</%def>
