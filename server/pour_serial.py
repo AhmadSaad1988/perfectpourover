@@ -12,9 +12,9 @@ try:
 except OSError:
 	ser = None
 
-global temperature 
+global temperature
 temperature = None
-global pour_time 
+global pour_time
 pour_time = None
 def status_thread():
   global temperature

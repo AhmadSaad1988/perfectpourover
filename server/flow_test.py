@@ -10,13 +10,13 @@ if True:
 
 	buf.write('LINEAR\n')
 	buf.write('0.0\n') # Theta Initial
-	buf.write('50\n') # Theta Rate
+	buf.write('0\n') # Theta Rate
 	buf.write('0.0\n') # Radius Initial
-	buf.write('.01\n') # Radius Rate
+	buf.write('0.0\n') # Radius Rate
 	buf.write('20\n') # Radius Scale
-	buf.write('5\n') # Time
-	buf.write('150\n') # Pump
-	buf.write('200\n') # Temp
+	buf.write('10\n') # Time
+	buf.write('125\n') # Pump
+	buf.write('70\n') # Temp
 	buf.write('END\n')
 
 	n = ser.write(buf.getvalue())

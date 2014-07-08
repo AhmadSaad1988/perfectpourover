@@ -61,7 +61,22 @@
 #include <Servo2.h>
 #include <JsonParser.h>
 
+// pour structure
+typedef struct p {
+  float theta_init;
+  float theta_rate;
+  float radius_init;
+  float radius_rate;
+  float time;
+  float radius_scale;
+  int pump;
+  int temp;
+  struct p * next_pour;
+} pour_t;
+
 // function definitions
+pour_t* construct_pour_sequence(JsonHashTable table);
+pour_t* receive_pour_sequence();
 
 // serial
 String input_string = "";         // a string to hold incoming data
@@ -69,6 +84,9 @@ boolean string_complete = false;  // whether the string is complete
 long temp_time;
 
 int serial_bufsize;
+
+// JSON Parser
+JsonParser<36> parser;
 
 // One Wire interface for temp senosr
 OneWire temp_wire(TEMP_PIN);  // on pin 10
@@ -98,22 +116,9 @@ int last_sent;
 // power info
 boolean on_switch;
 
-// pour structure
-typedef struct p {
-  float theta_init;
-  float theta_rate;
-  float radius_init;
-  float radius_rate;
-  float time;
-  float radius_scale;
-  int pump;
-  int temp;
-  struct p * next_pour;
-} pour_t;
-
-pour_t* receive_pour_sequence();
-
+// Sequence
 pour_t* seq;
+
 // ACCEL STEPPER FUNCTION DEFS
 void forwartemp_wiretep1() 
 {
@@ -136,6 +141,8 @@ void setup()
   actuator_setup();
   temp_setup();
   serial_setup();
+  
+  Serial.println("Setup Complete");
 }
 
 void stop_actuation()
@@ -167,40 +174,10 @@ void stop_actuation()
 
 void loop()
 { 
-  on_switch = digitalRead(ON_SWITCH_PIN);
-  if (on_switch) 
-    digitalWrite(POWER_LED_PIN,HIGH);
-  else {
-    digitalWrite(POWER_LED_PIN,LOW);
-    stop_actuation();
-    return;
-  }
+  handle_on_switch();
     
-  if (string_complete)
-  {
-   
-    if (input_string == START_POUR_COMMAND)
-    {
-      Serial.println("Receiving Pour Sequence");
-      seq = receive_pour_sequence();
-      if (seq != NULL) {
-        temp_setpoint = seq ->temp;
-        Serial.println("Received sequence");
-      } else {
-        Serial.println("Received NULL sequence");
-      }
-      send_temp();
-    }
-    else if (input_string ==  STOP_COMMAND)
-    {
-      Serial.println("Received stop command");
-      stop_actuation();
-    } else 
-    {
-      Serial.println("Unrecognized Command");
-    }
-    input_string = "";
-    string_complete = false;
+  if (string_complete){
+    parse_json();
   } 
   
   if (seq != NULL) {
@@ -209,6 +186,7 @@ void loop()
       long tmp = millis()-pour_tic;
       if (tmp >= 10)
       {
+        Serial.println("executing spiral");
         spiral();
       }
     } else if (setpoint_met)
@@ -221,7 +199,7 @@ void loop()
       spiral();
     } else 
     {
-      //Serial.println("Setpoint not met");
+      Serial.println("Setpoint not met");
     }
   }
   
@@ -232,30 +210,84 @@ void loop()
   }
 }
 
-void actuator_setup()
-{
-  // initialize motor shield
-  motor_shield = Adafruit_MotorShield();
-  motor_shield.begin();
-  
-  // initialize stepper
-  stepper = motor_shield.getStepper(N_STEPS, STEPPER_PORT);
-  stepper -> setSpeed(STEPPER_RPM);
-  
-  //initialize dc
-  pump = motor_shield.getMotor(PUMP_PORT);
-  pump -> setSpeed(PUMP_RPM);
-  
-  // initialzie servo
-  servo.attach(SERVO_PORT);
-  Astepper1.setMaxSpeed(((float) N_STEPS)*((float) STEPPER_RPM)/60.0);
-  Astepper1.setAcceleration(100);
-  
-  susan_angle = 0;
-  servo.write(90);
-  arm_radius = 0;
-  pour_start = -1;
+void handle_on_switch(){
+  on_switch = digitalRead(ON_SWITCH_PIN);
+  if (on_switch) 
+    digitalWrite(POWER_LED_PIN,HIGH);
+  else {
+    digitalWrite(POWER_LED_PIN,LOW);
+    stop_actuation();
+    return;
+  }
 }
+
+void parse_json()
+{
+  // JSON Parsing
+  Serial.println(input_string);
+  int bufSize = input_string.length()+1;
+  char input_buf[bufSize];
+  input_string.toCharArray(input_buf, bufSize);
+    
+  JsonHashTable hashTable = parser.parseHashTable(input_buf);
+  String command = hashTable.getString("Command");
+  Serial.println(command);
+  
+  if(command == "SEQUENCE"){
+    seq = construct_pour_sequence(hashTable);
+    if (seq != NULL) {
+      temp_setpoint = seq -> temp;
+      Serial.println("Received sequence");
+    } else {
+      Serial.println("Received NULL sequence");
+    }
+    send_temp();
+  } else if(command == STOP_COMMAND){
+    stop_actuation();
+  } else {
+    Serial.println("Unrecognized Command");
+  }
+  
+  input_string = "";
+  string_complete = false;
+}
+
+pour_t* construct_pour_sequence(JsonHashTable table){
+  pour_t *pour,*pour_seq = NULL;
+  
+  for(int i = 0; i < table.getLong("Length"); i++){
+    // Allocate new pour
+    pour = (pour_t*)(malloc(sizeof(pour_t)));
+    memset(pour,0x0,sizeof(pour_t));
+    
+    // Fill in pour params
+    pour -> theta_init = atof(table.getArray("ThetaInit").getString(i));
+    pour -> theta_rate = atof(table.getArray("ThetaRate").getString(i));
+    pour -> radius_init = atof(table.getArray("RadiusInit").getString(i));
+    pour -> radius_rate = atof(table.getArray("RadiusRate").getString(i));
+    pour -> radius_scale = atof(table.getArray("RadiusScale").getString(i));
+    pour -> time = atof(table.getArray("Time").getString(i));
+    pour -> pump = atoi(table.getArray("Pump").getString(i));
+    pour -> temp = atoi(table.getArray("Temp").getString(i));
+    
+    // Update pour_seq structure with new pour  
+    if(i == 0){
+      pour_seq = pour;
+    } else {
+      pour_t* tmp = pour_seq;
+      while (tmp -> next_pour != NULL) {
+        tmp = tmp -> next_pour;
+      }
+      tmp -> next_pour = pour;
+    } 
+    
+    // Clear local pour to prep for next iter
+    pour = NULL;
+  }
+  
+  return pour_seq;
+}
+
 
 pour_t* receive_pour_sequence()
 {
@@ -323,6 +355,31 @@ pour_t* receive_pour_sequence()
   return pour_seq;
 }
 
+void actuator_setup()
+{
+  // initialize motor shield
+  motor_shield = Adafruit_MotorShield();
+  motor_shield.begin();
+  
+  // initialize stepper
+  stepper = motor_shield.getStepper(N_STEPS, STEPPER_PORT);
+  stepper -> setSpeed(STEPPER_RPM);
+  
+  //initialize dc
+  pump = motor_shield.getMotor(PUMP_PORT);
+  pump -> setSpeed(PUMP_RPM);
+  
+  // initialzie servo
+  servo.attach(SERVO_PORT);
+  Astepper1.setMaxSpeed(((float) N_STEPS)*((float) STEPPER_RPM)/60.0);
+  Astepper1.setAcceleration(100);
+  
+  susan_angle = 0;
+  servo.write(90);
+  arm_radius = 0;
+  pour_start = -1;
+}
+
 void spiral() 
 {
   if (pour_start == -1) 
@@ -375,6 +432,7 @@ void spiral()
   //Astepper1.setSpeed(STEP_RATIO*seq->theta_rate*60.0/360.0);
   //Serial.println(next_angle);
   go_to(next_radius, next_angle);
+  Serial.println("spiraling");
 }
 
 void go_to(float r, float theta)
@@ -384,22 +442,28 @@ void go_to(float r, float theta)
   int servo_angle;
   
   // go to the angle that will give r
-  if (abs(r) > MAX_RADIUS) {
+  if (abs(r) > MAX_RADIUS)
     r = (r/abs(r))*MAX_RADIUS;
-  }
   servo_angle = round(radius_to_angle(r,ARM_LENGTH))-4;
   servo.write(servo_angle);
   
   // calculate number of steps for stepper motor to take
-  if (susan_angle <= theta) {
+  if (susan_angle <= theta)
     delta_step_angle = (theta - susan_angle);
-  }
-  else {
+  else 
     delta_step_angle = (theta + 360 - susan_angle);
-  }
+//  if (susan_angle <= theta)
+//    delta_step_angle = (theta + susan_angle);
+//  else 
+//    delta_step_angle = (theta - 360 +susan_angle);
   delta_steps = (angle_to_steps(delta_step_angle,N_STEPS,STEP_RATIO));
-  if ( delta_steps > 0) {
+  Serial.println(delta_step_angle);
+  Serial.println(delta_steps);
+  if ( delta_steps > 0) 
+  {
       stepper -> step(delta_steps, FORWARD, DOUBLE);
+      //Astepper1.move(delta_steps);
+//      Astepper1.moveTo(delta_steps);
   }
   
   //update current radius and angle
@@ -508,13 +572,13 @@ void send_temp()
   temp = ( (data[1] << 8) + data[0] )*0.0625;
   temp = temp * 1.8 + 32;
   Serial.println(TEMP_COMMAND);
-  Serial.println(temp); 
+  Serial.println(temp);
   if ((temp > (temp_setpoint-TEMP_DELTA)) && (temp < (temp_setpoint+TEMP_DELTA))) {
-    digitalWrite(WATER_TEMP_LED_PIN,HIGH);
-    setpoint_met = true;
-  } else {
     digitalWrite(WATER_TEMP_LED_PIN,LOW);
     setpoint_met = false;
+  } else {
+    digitalWrite(WATER_TEMP_LED_PIN,HIGH);
+    setpoint_met = true;
   }
 }
 
