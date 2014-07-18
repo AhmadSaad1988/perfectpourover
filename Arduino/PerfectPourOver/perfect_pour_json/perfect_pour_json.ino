@@ -76,7 +76,6 @@ typedef struct p {
 
 // function definitions
 pour_t* construct_pour_sequence(JsonHashTable table);
-pour_t* receive_pour_sequence();
 
 // serial
 String input_string = "";         // a string to hold incoming data
@@ -149,7 +148,6 @@ void stop_actuation()
 { 
   if (pour_attached) 
   {
-    //stepper -> release();
     Astepper1.disableOutputs();
     if (seq -> pump)
     {
@@ -289,72 +287,6 @@ pour_t* construct_pour_sequence(JsonHashTable table){
 }
 
 
-pour_t* receive_pour_sequence()
-{
-  pour_t *pour,*pour_seq = NULL;
-  int len;
-  char serial_buf[50];
-  int serial_bufsize = 50;
-  memset(serial_buf,0x0,serial_bufsize);
-  while (strcmp(serial_buf,END_POUR_COMMAND) != 0)
-  {
-    pour = (pour_t*)(malloc(sizeof(pour_t)));
-    memset(pour,0x0,sizeof(pour_t));
-    for (int i = 0; i < N_POUR_PARAMS; i++) 
-    {
-      memset(serial_buf,0x0,serial_bufsize);
-      Serial.readBytesUntil('\n', serial_buf, serial_bufsize);
-      Serial.println(serial_buf);
-      
-      if (strcmp(serial_buf,STOP_COMMAND) == 0)
-      {
-          Serial.println("received Stop Command");
-          return NULL;
-      }
-      switch(i) 
-      {
-        case THETA_INITIAL:
-          pour -> theta_init = atof(serial_buf);  
-          break;
-        case THETA_RATE:
-          pour -> theta_rate = atof(serial_buf);  
-          break;
-        case RADIUS_INITIAL:
-          pour -> radius_init = atof(serial_buf);  
-          break;
-        case RADIUS_RATE:
-          pour -> radius_rate = atof(serial_buf);  
-          break;
-        case RADIUS_SCALE:
-           pour -> radius_scale = atof(serial_buf);  
-           break;
-        case TIME:
-           pour -> time = atof(serial_buf);  
-          break;
-        case PUMP:
-          pour -> pump = atoi(serial_buf);
-          break;
-        case TEMP:
-          pour -> temp = atoi(serial_buf);
-          break;
-      }
-    }
-    
-    if (pour_seq != NULL)
-    {
-      pour_t* tmp = pour_seq;
-      while (tmp -> next_pour != NULL)
-        tmp = tmp -> next_pour;
-      tmp -> next_pour = pour;
-    } else 
-      pour_seq = pour;
-    pour = NULL;
-    memset(serial_buf,0x0,serial_bufsize);
-    Serial.readBytesUntil('\n', serial_buf, serial_bufsize);
-  }
-  return pour_seq;
-}
-
 void actuator_setup()
 {
   // initialize motor shield
@@ -429,8 +361,6 @@ void spiral()
   next_angle = (seq -> theta_init + seq -> theta_rate * delta_time);
   if (next_angle > 360)
     next_angle -= 360;
-  //Astepper1.setSpeed(STEP_RATIO*seq->theta_rate*60.0/360.0);
-  //Serial.println(next_angle);
   go_to(next_radius, next_angle);
   Serial.println("spiraling");
 }
@@ -462,8 +392,6 @@ void go_to(float r, float theta)
   if ( delta_steps > 0) 
   {
       stepper -> step(delta_steps, FORWARD, DOUBLE);
-      //Astepper1.move(delta_steps);
-//      Astepper1.moveTo(delta_steps);
   }
   
   //update current radius and angle
@@ -485,54 +413,6 @@ int angle_to_steps(float angle, int n_steps,float step_ratio)
 {
   return round(n_steps*step_ratio*angle/360.0);
 }
-
-//void send_temp(){
-//   byte i;
-//  byte present = 0;
-//  byte data[12];
-//  byte addr[8];
-//
-//  if ( !temp_wire.search(addr)) {
-//      temp_wire.reset_search();
-//      return;
-//  }
-//
-//  if ( OneWire::crc8( addr, 7) != addr[7]) {
-//      //Serial.print("CRC is not valid!\n");
-//      return;
-//  }
-//
-//  else if ( addr[0] == 0x28) {
-//  }
-//  else {
-//      return;
-//  }
-//
-//  temp_wire.reset();
-//  temp_wire.select(addr);
-//  temp_wire.write(0x44,1);         // start conversion, with parasite power on at the end
-//
-//  delay(1000);     // maybe 750ms is enough, maybe not
-//  // we might do a temp_wire.depower() here, but the reset will take care of it.
-//
-//  present = temp_wire.reset();
-//  temp_wire.select(addr);    
-//  temp_wire.write(0xBE);         // Read Scratchpad
-//
-//  for ( i = 0; i < 9; i++) {           // we need 9 bytes
-//    data[i] = temp_wire.read();
-//  }
-//
-//  temp = ( (data[1] << 8) + data[0] )*0.0625;
-//  temp = temp * 1.8 + 32; 
-//if ((temp < (temp_setpoint-TEMP_DELTA)) || (temp > (temp_setpoint+TEMP_DELTA))) {
-//    digitalWrite(WATER_TEMP_LED_PIN,LOW);
-//    setpoint_met = false;
-//  } else {
-//    digitalWrite(WATER_TEMP_LED_PIN,HIGH);
-//    setpoint_met = true;
-//  }
-//}
 
 void send_temp()
 {  
@@ -612,8 +492,3 @@ void serialEvent() {
     }
   }
 }
-
-
-
-
-
